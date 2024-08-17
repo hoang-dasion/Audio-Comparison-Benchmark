@@ -17,7 +17,7 @@ from audio_algorithm.short_fourier import ShortFourier
 from audio_algorithm.wavelet import Wavelet
 from const import FEATURES_DIC, METRICS_DIC
 from plot.audio_plot import AudioPlot
-from utils import load_params, save_params, save_config
+from utils import save_params, save_config
 
 class AudioProcessor:
     def __init__(self):
@@ -25,6 +25,19 @@ class AudioProcessor:
         self.fourier = Fourier()
         self.short_fourier = ShortFourier()
         self.wavelet = Wavelet()
+
+    def load_params(self, params_file):
+        default_params = {'sr': 22050, 'n_components': 40}
+        if params_file:
+            params_file = params_file if params_file.endswith('.json') else f"{params_file}.json"
+            if os.path.exists(params_file):
+                try:
+                    with open(params_file, 'r') as f:
+                        custom_params = json.load(f)
+                        default_params.update(custom_params)
+                except json.JSONDecodeError as e:
+                    print(f"Error loading parameter file: {e}")
+        return default_params
 
     def compact_feature_representation(self, features, n_components=40):
         def process_array(arr):
@@ -112,7 +125,7 @@ class AudioProcessor:
         durations = durations.split(',') if durations else ["full"]
 
         # Load and save configurations
-        params = load_params(params_file)
+        params = self.load_params(params_file)
         save_params(params, params_file, output_dir, algorithm)
         save_config(algorithm, runtimes, durations, feature_names, params, metrics, output_dir, audio_path)
 
@@ -199,7 +212,7 @@ class AudioProcessor:
 
     def _create_feature_arrays(self, feature_names, combined_features, output_dir, algorithm):
         feature_arrays = {}
-        for feature_name in tqdm(feature_names, desc="Creating feature arrays"):
+        for feature_name in feature_names:
             feature_arrays[feature_name] = np.array(combined_features[feature_name])
             
             csv_dir = os.path.join(output_dir, algorithm, feature_name, 'data')
@@ -215,6 +228,7 @@ class AudioProcessor:
         labels_path = os.path.join(output_dir, algorithm, 'labels.csv')
         np.savetxt(labels_path, np.array(combined_labels), delimiter=',', fmt='%d')
         print(f"Labels saved to: {labels_path}")
+        print("Done!\n")
 
     def _plot_metric_comparisons(self, results, metrics, output_dir, algorithm):
         for metric in metrics:

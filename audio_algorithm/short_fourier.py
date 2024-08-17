@@ -1,5 +1,3 @@
-# audio_algorithm/short_fourier.py
-
 import librosa
 
 class ShortFourier:
@@ -14,6 +12,9 @@ class ShortFourier:
             'spectral_centroid': self.spectral_centroid,
             'rms': self.root_mean_square_energy
         }
+
+    def __repr__(self):
+        print(f"{self.algorithm.map.keys()}")        
 
     def extract(self, algorithm_name, y, sr):
         return self.algorithm_map[algorithm_name](y, sr)

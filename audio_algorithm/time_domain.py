@@ -1,5 +1,3 @@
-# audio_algorithm/time_domain.py
-
 import numpy as np
 import librosa
 from scipy import signal, stats
@@ -13,6 +11,9 @@ class TimeDomain:
             'temporal_moments': self.temporal_moments,
             'peak_to_peak': self.peak_to_peak_amplitude
         }
+
+    def __repr__(self):
+        print(f"{self.algorithm.map.keys()}")        
 
     def extract(self, algorithm_name, y):
         return self.algorithm_map[algorithm_name](y)

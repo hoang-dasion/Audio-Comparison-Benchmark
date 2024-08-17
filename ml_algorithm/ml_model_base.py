@@ -1,5 +1,3 @@
-# ml_algorithm/ml_model_base.py
-
 import os
 import json
 from sklearn.pipeline import Pipeline
@@ -25,12 +23,6 @@ class MLModel:
             return json.load(f)
 
     def create_pipeline(self):
-        if self.model_class in [RandomForestClassifier, GradientBoostingClassifier]:
-            return Pipeline([
-                ('model', self.model_class(**self.hyperparams))
-            ])
-        else:
-            return Pipeline([
-                ('imputer', IterativeImputer(random_state=42)),
-                ('model', self.model_class(**self.hyperparams))
-            ])
+        return Pipeline([
+            ('model', self.model_class(**self.hyperparams))
+        ])

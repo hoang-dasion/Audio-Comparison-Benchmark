@@ -1,5 +1,3 @@
-# audio_algorithm/wavelet.py
-
 import numpy as np
 import pywt
 
@@ -12,6 +10,9 @@ class Wavelet:
             'wavelet_energy': self.wavelet_energy,
             'wavelet_entropy': self.wavelet_entropy
         }
+
+    def __repr__(self):
+        print(f"{self.algorithm.map.keys()}")        
 
     def extract(self, algorithm_name, y):
         return self.algorithm_map[algorithm_name](y)

@@ -1,5 +1,3 @@
-# audio_algorithm/fourier.py
-
 import numpy as np
 
 class Fourier:
@@ -11,6 +9,9 @@ class Fourier:
             'phase_spectrum': self.phase_spectrum
         }
 
+    def __repr__(self):
+        print(f"{self.algorithm.map.keys()}")
+        
     def extract(self, algorithm_name, y):
         return self.algorithm_map[algorithm_name](y)
 

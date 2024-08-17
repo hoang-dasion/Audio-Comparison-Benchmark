@@ -1,4 +1,3 @@
-# ml_algorithm/random_forest.py
 from sklearn.ensemble import RandomForestClassifier
 from .ml_model_base import MLModel
 

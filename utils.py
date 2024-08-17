@@ -24,20 +24,6 @@ def get_models(output_dir):
         'Multi-layer Perceptron': MLP(f"{output_dir}/params/Multi-layer Perceptron/mlp_params.json")
     }
 
-      
-def load_params(params_file):
-    default_params = {'sr': 22050, 'n_components': 40}
-    if params_file:
-        params_file = params_file if params_file.endswith('.json') else f"{params_file}.json"
-        if os.path.exists(params_file):
-            try:
-                with open(params_file, 'r') as f:
-                    custom_params = json.load(f)
-                    default_params.update(custom_params)
-            except json.JSONDecodeError as e:
-                print(f"Error loading parameter file: {e}")
-    return default_params
-
 def save_config(algorithm, runtimes, durations, feature_names, params, metrics, output_dir, audio_path):
     config_info = f"""{algorithm.replace("_", " ").title()} Analysis
     metrics: {metrics}
