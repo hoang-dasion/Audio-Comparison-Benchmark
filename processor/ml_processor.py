@@ -47,6 +47,7 @@ class MLProcessor:
         test_accuracies = []
         model_names = []
         
+        results = {}  # New dictionary to store results for each model
         for model_name in tqdm(selected_models, desc="Training ML models"):
             
             model, train_accuracy, test_accuracy = self.train_and_predict(X, y, model_name, algorithm=algorithm, sub_algorithm=sub_algorithm)
@@ -54,7 +55,16 @@ class MLProcessor:
             train_accuracies.append(train_accuracy)
             test_accuracies.append(test_accuracy)
             model_names.append(model_name)
+
+            # Store results for this model
+            results[model_name] = {
+                'train_accuracy': train_accuracy,
+                'test_accuracy': test_accuracy,
+                'model': model
+            }
         
         plot_output_dir = f"{self.output_dir}/plots/{algorithm}/{sub_algorithm}/accuracy"
 
         MLPlot.plot_grouped_accuracy_comparison(train_accuracies, test_accuracies, model_names, f"{plot_output_dir}/grouped_train_test_comparison.png")
+    
+        return results

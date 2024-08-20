@@ -228,7 +228,7 @@ class AudioProcessor:
         labels_path = os.path.join(output_dir, algorithm, 'labels.csv')
         np.savetxt(labels_path, np.array(combined_labels), delimiter=',', fmt='%d')
         print(f"Labels saved to: {labels_path}")
-        print("Done!\n")
+        print("Done!")
 
     def _plot_metric_comparisons(self, results, metrics, output_dir, algorithm):
         for metric in metrics:
