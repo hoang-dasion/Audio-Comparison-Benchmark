@@ -10,11 +10,15 @@ class Wavelet:
             'wavelet_energy': self.wavelet_energy,
             'wavelet_entropy': self.wavelet_entropy
         }
+        self.wavelet = 'db4'
+        self.level = 5
 
     def __repr__(self):
-        print(f"{self.algorithm.map.keys()}")        
+        return f"{self.algorithm_map.keys()}"
 
     def extract(self, algorithm_name, y):
+        if algorithm_name not in self.algorithm_map:
+            raise ValueError(f"Unknown algorithm: {algorithm_name}")
         return self.algorithm_map[algorithm_name](y)
 
     def trim_coeffs(self, coeffs, target_length):
@@ -31,26 +35,30 @@ class Wavelet:
         return trimmed
 
     def wavelet_coefficients(self, y):
-        coeffs = pywt.wavedec(y, 'db4', level=5)
-        return self.trim_coeffs(coeffs, len(y))
+        coeffs = pywt.wavedec(y, self.wavelet, level=self.level)
+        trimmed_coeffs = self.trim_coeffs(coeffs, len(y))
+        return np.concatenate(trimmed_coeffs)
 
     def wavelet_packet(self, y):
-        wp = pywt.WaveletPacket(data=y, wavelet='db4', mode='symmetric')
-        coeffs = [node.data for node in wp.get_level(5, 'natural')]
-        return self.trim_coeffs(coeffs, len(y))
+        wp = pywt.WaveletPacket(data=y, wavelet=self.wavelet, mode='symmetric')
+        coeffs = [node.data for node in wp.get_level(self.level, 'natural')]
+        trimmed_coeffs = self.trim_coeffs(coeffs, len(y))
+        return np.concatenate(trimmed_coeffs)
 
     def multi_resolution_analysis(self, y):
-        coeffs = pywt.wavedec(y, 'db4', level=5)
+        coeffs = pywt.wavedec(y, self.wavelet, level=self.level)
         trimmed_coeffs = self.trim_coeffs(coeffs, len(y))
-        return [pywt.waverec(trimmed_coeffs[:i+1] + [None]*(len(trimmed_coeffs)-i-1), 'db4')[:len(y)] for i in range(len(trimmed_coeffs))]
+        reconstructed = [pywt.waverec(trimmed_coeffs[:i+1] + [None]*(len(trimmed_coeffs)-i-1), self.wavelet)[:len(y)] for i in range(len(trimmed_coeffs))]
+        return np.concatenate(reconstructed)
 
     def wavelet_energy(self, y):
-        coeffs = pywt.wavedec(y, 'db4', level=5)
+        coeffs = pywt.wavedec(y, self.wavelet, level=self.level)
         trimmed_coeffs = self.trim_coeffs(coeffs, len(y))
-        return [np.sum(np.square(c)) for c in trimmed_coeffs]
+        return np.array([np.sum(np.square(c)) for c in trimmed_coeffs])
 
     def wavelet_entropy(self, y):
-        coeffs = pywt.wavedec(y, 'db4', level=5)
+        coeffs = pywt.wavedec(y, self.wavelet, level=self.level)
         trimmed_coeffs = self.trim_coeffs(coeffs, len(y))
         total_energy = np.sum([np.sum(np.square(c)) for c in trimmed_coeffs])
-        return -np.sum([(np.sum(np.square(c))/total_energy) * np.log2(np.sum(np.square(c))/total_energy) for c in trimmed_coeffs if np.sum(np.square(c)) > 0])
+        probabilities = [np.sum(np.square(c))/total_energy for c in trimmed_coeffs if np.sum(np.square(c)) > 0]
+        return np.array([-np.sum(p * np.log2(p) for p in probabilities)])

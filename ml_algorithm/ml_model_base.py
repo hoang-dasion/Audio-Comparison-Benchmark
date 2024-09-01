@@ -1,9 +1,7 @@
 import os
 import json
 from sklearn.pipeline import Pipeline
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
-from sklearn.experimental import enable_iterative_imputer
-from sklearn.impute import IterativeImputer
+from sklearn.preprocessing import StandardScaler
 
 class MLModel:
     def __init__(self, model_class, params_file):
@@ -18,11 +16,12 @@ class MLModel:
             default_params = {}
             with open(self.params_file, 'w') as f:
                 json.dump(default_params, f, indent=4)
-        
+
         with open(self.params_file, 'r') as f:
             return json.load(f)
 
     def create_pipeline(self):
         return Pipeline([
+            ('scaler', StandardScaler()),
             ('model', self.model_class(**self.hyperparams))
         ])
