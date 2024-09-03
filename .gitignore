@@ -51,4 +51,4 @@ cached_models/
 *.jar
 *.rar
 *.tar
-*.zip
+*.zip.DS_Store
