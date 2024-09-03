@@ -10,7 +10,7 @@ class FeatureSelectionProcessor:
         pass
 
     def unsupervised_feature_selection(self, X, feature_names, n_features=10):
-        print("Starting feature selection...")
+        # "Starting feature selection..."
         numeric_columns = X.select_dtypes(include=[np.number]).columns
         X_numeric = X[numeric_columns]
         feature_names_numeric = [name for name in feature_names if name in numeric_columns]
@@ -26,7 +26,6 @@ class FeatureSelectionProcessor:
         top_features_idx = np.argsort(feature_importance)[::-1][:n_features]
         selected_feature_names = np.array(feature_names_numeric)[top_features_idx]
 
-        print("Feature selection completed.")
         print(f"Selected {n_features} features: {selected_feature_names.tolist()}")
 
         return selected_feature_names, X_numeric[selected_feature_names]

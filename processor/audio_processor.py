@@ -33,19 +33,17 @@ class AudioProcessor:
             print(f"Loading existing features for {algorithm} from {output_file}")
             features = pd.read_csv(output_file)
         else:
-            print(f"Processing audio files for algorithm: {algorithm}")
             individual_features = self.process_audio_files(algorithm, feature_names, audio_path)
+
             if individual_features.empty:
                 print(f"No features extracted for {algorithm}. Skipping feature combination creation.")
                 return pd.DataFrame()
-            print("Creating feature combinations...")
+
             features = self.create_all_feature_combinations(individual_features, feature_names)
             os.makedirs(self.output_dir, exist_ok=True)
             features.to_csv(output_file, index=False)
             print(f"Saved all features to {output_file}")
 
-        print(f"Extracted features shape: {features.shape}")
-        print(f"Unique Participant_IDs in features: {features['Participant_ID'].nunique()}")
         return features
 
     # Inherited and adapted from Oscar's daic_woz_prep.py

@@ -1,14 +1,16 @@
 import os
 import argparse
-from processor.audio_processor import AudioProcessor
-from processor.feature_selection_processor import FeatureSelectionProcessor
-from processor.ml_processor import MLProcessor
+from concurrent.futures import ProcessPoolExecutor
+import multiprocessing
 from plot.ml_plot import MLPlot
-from const import AUDIO_ALGORITHMS, ML_ALGORITHMS, TARGET_COLUMNS
+from const import TARGET_COLUMNS
 from utils import (
     create_time_based_output_directory, check_audio_files, check_label_files,
-    display_options, get_user_selection, process_algorithm, get_user_choices
+    get_user_choices, process_algorithm
 )
+
+def process_algorithm_wrapper(args):
+    return process_algorithm(*args)
 
 def main(args):
     print("Creating time-based output directory...")
@@ -23,29 +25,28 @@ def main(args):
     print("Checking label files...")
     check_label_files()
 
-    print("Initializing processors...")
-    audio_processor = AudioProcessor()
-    feature_selector = FeatureSelectionProcessor()
-    ml_processor = MLProcessor(args.cached_models_dir, args.plots_dir)
+    user_choices = get_user_choices(args)
 
     all_results = {target: {} for target in TARGET_COLUMNS}
 
-    user_choices = get_user_choices(args)
-
-    for algorithm in user_choices['audio_algorithms']:
-        try:
-            algorithm_results = process_algorithm(
-                algorithm, args, audio_processor, feature_selector, ml_processor,
-                user_choices['feature_methods'][algorithm], user_choices['ml_algorithms']
+    # Create a process pool
+    num_processes = multiprocessing.cpu_count()
+    with ProcessPoolExecutor(max_workers=num_processes) as executor:
+        futures = []
+        for algorithm in user_choices['audio_algorithms']:
+            future = executor.submit(
+                process_algorithm_wrapper,
+                (algorithm, args, user_choices['feature_methods'][algorithm], user_choices['ml_algorithms'])
             )
+            futures.append(future)
 
-            if algorithm_results:
+        # Wait for all futures to complete
+        for future in futures:
+            result = future.result()
+            if result:
+                algorithm, algorithm_results = result
                 for target in TARGET_COLUMNS:
                     all_results[target][algorithm] = algorithm_results[target]
-
-        except Exception as e:
-            print(f"Error processing algorithm {algorithm}: {str(e)}")
-            continue
 
     for target in TARGET_COLUMNS:
         print(f"\nGenerating 3D plot for {target}...")

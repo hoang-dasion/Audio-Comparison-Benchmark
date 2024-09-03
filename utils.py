@@ -1,11 +1,59 @@
-# utils.py
-
 import os
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from const import AUDIO_ALGORITHMS, ML_ALGORITHMS, TARGET_COLUMNS, LABELS_FILE_NAMES, LABELS_OUTPUT_DIR
 from datetime import datetime
+from processor.audio_processor import AudioProcessor
+from processor.feature_selection_processor import FeatureSelectionProcessor
+from processor.ml_processor import MLProcessor
+
+def process_algorithm(algorithm, args, selected_features, selected_ml_algorithms):
+    print(f"Processing audio algorithm: {algorithm}")
+    
+    # Create processor objects inside this function
+    audio_processor = AudioProcessor()
+    feature_selector = FeatureSelectionProcessor()
+    ml_processor = MLProcessor(args.cached_models_dir, args.plots_dir)
+    
+    feature_subsets = audio_processor.run_analysis(algorithm, args.audio_path, selected_features, force_reprocess=args.force_reprocess)
+
+    if feature_subsets.empty:
+        print(f"No features extracted for {algorithm}. Skipping this algorithm.")
+        return None
+
+    # "Loading and merging data for {algorithm}..."
+    merged_data = load_and_merge_data(["dev_split", "train_split", "test_split"], feature_subsets)
+
+    # "Splitting data for {algorithm}..."
+    X = merged_data.drop(['Participant_ID'] + TARGET_COLUMNS, axis=1)
+    y = merged_data[TARGET_COLUMNS]
+
+    X_train_dev, X_test, y_train_dev, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_train, X_dev, y_train, y_dev = train_test_split(X_train_dev, y_train_dev, test_size=0.2, random_state=42)
+
+    # "Performing unsupervised feature selection..."
+    selected_feature_names, X_selected = feature_selector.unsupervised_feature_selection(X, X.columns)
+
+    X_train_selected = X_train[selected_feature_names]
+    X_dev_selected = X_dev[selected_feature_names]
+    X_test_selected = X_test[selected_feature_names]
+
+    algorithm_results = {}
+
+    for target in TARGET_COLUMNS:
+        y_train_target = y_train[target]
+        y_dev_target = y_dev[target]
+        y_test_target = y_test[target]
+
+        ml_results = ml_processor.run_ml_pipeline(
+            X_train_selected, y_train_target, X_dev_selected, y_dev_target, X_test_selected, y_test_target, 
+            selected_ml_algorithms, algorithm=algorithm, sub_algorithm=target, target=target, use_cache=args.use_cache
+        )
+
+        algorithm_results[target] = {feature: ml_results for feature in selected_feature_names}
+
+    return algorithm, algorithm_results
 
 def get_user_choices(args):
     choices = {
@@ -37,49 +85,6 @@ def get_user_choices(args):
         choices['ml_algorithms'] = list(ML_ALGORITHMS.keys())
 
     return choices
-
-def process_algorithm(algorithm, args, audio_processor, feature_selector, ml_processor, selected_features, selected_ml_algorithms):
-    print(f"\nProcessing algorithm: {algorithm}")
-    
-    feature_subsets = audio_processor.run_analysis(algorithm, args.audio_path, selected_features, force_reprocess=args.force_reprocess)
-
-    if feature_subsets.empty:
-        print(f"No features extracted for {algorithm}. Skipping this algorithm.")
-        return None
-
-    print(f"Loading and merging data for {algorithm}...")
-    merged_data = load_and_merge_data(LABELS_FILE_NAMES, feature_subsets)
-
-    print(f"Splitting data for {algorithm}...")
-    X = merged_data.drop(['Participant_ID'] + TARGET_COLUMNS, axis=1)
-    y = merged_data[TARGET_COLUMNS]
-
-    X_train_dev, X_test, y_train_dev, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    X_train, X_dev, y_train, y_dev = train_test_split(X_train_dev, y_train_dev, test_size=0.2, random_state=42)
-
-    print("Performing unsupervised feature selection...")
-    selected_feature_names, X_selected = feature_selector.unsupervised_feature_selection(X, X.columns)
-
-    X_train_selected = X_train[selected_feature_names]
-    X_dev_selected = X_dev[selected_feature_names]
-    X_test_selected = X_test[selected_feature_names]
-
-    algorithm_results = {}
-
-    for target in TARGET_COLUMNS:
-        print(f"Running ML models for target: {target}")
-        y_train_target = y_train[target]
-        y_dev_target = y_dev[target]
-        y_test_target = y_test[target]
-
-        ml_results = ml_processor.run_ml_pipeline(
-            X_train_selected, y_train_target, X_dev_selected, y_dev_target, X_test_selected, y_test_target, 
-            selected_ml_algorithms, algorithm=algorithm, sub_algorithm=target, target=target, use_cache=args.use_cache
-        )
-
-        algorithm_results[target] = {feature: ml_results for feature in selected_feature_names}
-
-    return algorithm_results
 
 def create_time_based_output_directory(base_path="./output"):
     current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
