@@ -7,7 +7,6 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import cm
 import seaborn as sns
 import logging
-from const import COLOR_BARS
 
 class MLPlot:
     @staticmethod

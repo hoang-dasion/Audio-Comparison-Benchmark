@@ -26,10 +26,3 @@ LABELS_FILE_NAMES = [
 
 DISEASE_COLUMNS = ['PHQ_Binary', 'PHQ_Score', 'PCL-C (PTSD)', 'PTSD Severity']
 TARGET_COLUMNS = ["PTSD_class", "PHQ_class"]
-
-COLOR_BARS = [
-    "#FFA500", "#FFD700", "#FFFF00", "#9ACD32", "#32CD32", "#00FA9A",
-    "#00CED1", "#1E90FF", "#0000FF", "#8A2BE2", "#9932CC", "#FF00FF",
-    "#FF1493", "#FF69B4", "#DDA0DD", "#F0E68C", "#BDB76B", "#556B2F",
-    "#008080", "#4682B4", "#483D8B", "#800080", "#FF4500"
-]
