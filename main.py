@@ -1,5 +1,3 @@
-# main.py
-
 import os
 import argparse
 from processor.audio_processor import AudioProcessor
