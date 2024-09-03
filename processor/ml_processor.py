@@ -1,18 +1,18 @@
+# ml_processor.py
+
 import os
 import pickle
 import numpy as np
-from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
 from sklearn.metrics import accuracy_score, confusion_matrix
 from const import ML_ALGORITHMS
 from plot.ml_plot import MLPlot
 import importlib
 
 class MLProcessor:
-    def __init__(self, output_dir='ML'):
-        self.output_dir = output_dir
+    def __init__(self, cache_dir, plots_dir):
+        self.cache_dir = cache_dir
+        self.plots_dir = plots_dir
         self.models = self._load_models()
-        self.cache_dir = os.path.join(output_dir, 'cached_models')
-        os.makedirs(self.cache_dir, exist_ok=True)
 
     def _load_models(self):
         models = {}
@@ -38,16 +38,12 @@ class MLProcessor:
         return None
 
     def train_and_predict(self, X_train, y_train, X_dev, y_dev, X_test, y_test, model_name, algorithm='', sub_algorithm='', target='', use_cache=False):
-        base_dir = f"{self.output_dir}/plots/{algorithm}/{sub_algorithm}"
+        algorithm_plots_dir = os.path.join(self.plots_dir, algorithm, sub_algorithm)
+        os.makedirs(algorithm_plots_dir, exist_ok=True)
 
         if use_cache:
             cached_model = self.load_model(model_name, algorithm, sub_algorithm, target)
-            if cached_model is not None:
-                print(f"Using cached model for {model_name}")
-                pipeline = cached_model
-            else:
-                print(f"No cached model found for {model_name}. Training new model.")
-                pipeline = None
+            pipeline = cached_model if cached_model is not None else None
         else:
             pipeline = None
 
@@ -70,10 +66,11 @@ class MLProcessor:
         cm_test = confusion_matrix(y_test, y_pred_test)
         classes = np.unique(np.concatenate([y_train, y_dev, y_test]))
 
-        os.makedirs(f"{base_dir}/confusion_matrix", exist_ok=True)
-        MLPlot.plot_confusion_matrix(cm_train, classes, f"{base_dir}/confusion_matrix/{model_name}_train_cm.png")
-        MLPlot.plot_confusion_matrix(cm_dev, classes, f"{base_dir}/confusion_matrix/{model_name}_dev_cm.png")
-        MLPlot.plot_confusion_matrix(cm_test, classes, f"{base_dir}/confusion_matrix/{model_name}_test_cm.png")
+        confusion_matrix_dir = os.path.join(algorithm_plots_dir, "confusion_matrix")
+        os.makedirs(confusion_matrix_dir, exist_ok=True)
+        MLPlot.plot_confusion_matrix(cm_train, classes, os.path.join(confusion_matrix_dir, f"{model_name}_train_cm.png"))
+        MLPlot.plot_confusion_matrix(cm_dev, classes, os.path.join(confusion_matrix_dir, f"{model_name}_dev_cm.png"))
+        MLPlot.plot_confusion_matrix(cm_test, classes, os.path.join(confusion_matrix_dir, f"{model_name}_test_cm.png"))
 
         return pipeline, train_accuracy, dev_accuracy, test_accuracy
 
@@ -103,14 +100,14 @@ class MLProcessor:
                     'error': str(e)
                 }
 
-        plot_output_dir = f"{self.output_dir}/plots/{algorithm}/{sub_algorithm}/accuracy"
-        os.makedirs(plot_output_dir, exist_ok=True)
+        accuracy_plot_dir = os.path.join(self.plots_dir, algorithm, sub_algorithm, "accuracy")
+        os.makedirs(accuracy_plot_dir, exist_ok=True)
         MLPlot.plot_grouped_accuracy_comparison(
             [results[model]['train_accuracy'] for model in selected_models if results[model]['train_accuracy'] is not None],
             [results[model]['dev_accuracy'] for model in selected_models if results[model]['dev_accuracy'] is not None],
             [results[model]['test_accuracy'] for model in selected_models if results[model]['test_accuracy'] is not None],
             [model for model in selected_models if results[model]['train_accuracy'] is not None],
-            f"{plot_output_dir}/grouped_train_dev_test_comparison.png"
+            os.path.join(accuracy_plot_dir, "grouped_train_dev_test_comparison.png")
         )
 
         return results

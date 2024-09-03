@@ -11,6 +11,8 @@ import logging
 class MLPlot:
     @staticmethod
     def plot_confusion_matrix(cm, classes, filename):
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+
         plt.figure(figsize=(10, 8))
         plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
         plt.title('Confusion Matrix')
@@ -35,7 +37,16 @@ class MLPlot:
         plt.close()
 
     @staticmethod
-    def plot_grouped_accuracy_comparison(train_accuracies, dev_accuracies, test_accuracies, model_names, filename):
+    def plot_grouped_accuracy_comparison(
+            train_accuracies, 
+            dev_accuracies, 
+            test_accuracies, 
+            model_names, 
+            filename
+        ):
+
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        
         x = np.arange(len(model_names))
         width = 0.25
 
@@ -68,6 +79,10 @@ class MLPlot:
 
     @classmethod
     def plot_best_accuracies_3d(cls, all_results, output_dir, target):
+        if not all_results:
+            print(f"No data available to plot for target: {target}")
+            return None
+
         fig = plt.figure(figsize=(20, 15), dpi=300)
         ax = fig.add_subplot(111, projection='3d')
 
@@ -76,6 +91,10 @@ class MLPlot:
         for algo_results in all_results.values():
             all_features.update(algo_results.keys())
         all_features = sorted(list(all_features))
+
+        if not algorithms or not all_features:
+            print(f"Not enough data to create 3D plot for target: {target}")
+            return None
 
         xpos = np.arange(len(algorithms))
         ypos = np.arange(len(all_features))
@@ -91,21 +110,39 @@ class MLPlot:
 
         for i, algo in enumerate(algorithms):
             for j, feature in enumerate(all_features):
-                if feature in all_results[algo]:
-                    valid_results = [x for x in all_results[algo][feature].items() if x[1]['test_accuracy'] is not None]
-                    if valid_results:
-                        best_model = max(valid_results, key=lambda x: x[1]['test_accuracy'])
-                        accuracy = best_model[1]['test_accuracy']
-                        zpos[j, i] = accuracy
-                        if accuracy > best_combo["accuracy"]:
-                            best_combo = {
-                                "algo": algo,
-                                "feature": feature,
-                                "model": best_model[0],
-                                "accuracy": accuracy
-                            }
+                if feature not in all_results[algo]:
+                    continue
 
-        bars = ax.bar3d(xposM.ravel(), yposM.ravel(), np.zeros_like(dz), dx, dy, dz, shade=True, color=colors)
+                valid_results = [
+                    x for x in all_results[algo][feature].items() 
+                    if x[1]['test_accuracy'] is not None
+                ]
+
+                if not valid_results:
+                    continue
+
+                best_model = max(valid_results, key=lambda x: x[1]['test_accuracy'])
+                accuracy = best_model[1]['test_accuracy']
+                zpos[j, i] = accuracy
+                if accuracy > best_combo["accuracy"]:
+                    best_combo = {
+                        "algo": algo,
+                        "feature": feature,
+                        "model": best_model[0],
+                        "accuracy": accuracy
+                    }
+
+        if np.all(zpos == 0):
+            print(f"No valid accuracy data to plot for target: {target}")
+            return None
+
+        bars = ax.bar3d(
+            xposM.ravel(), 
+            yposM.ravel(), 
+            np.zeros_like(dz), 
+            dx, dy, dz, 
+            shade=True, color=colors
+        )
 
         ax.set_xlabel('Feature Extraction Algorithms', fontsize=14, labelpad=20)
         ax.set_ylabel('Feature Extraction Methods', fontsize=14, labelpad=20)
@@ -130,7 +167,7 @@ class MLPlot:
 
         ax.view_init(elev=20, azim=45)
 
-        plot_path = f"{output_dir}/best_accuracies_3d_plot_{target}.png"
+        plot_path = os.path.join(output_dir, f"best_accuracies_3d_plot_{target}.png")
         cls.save_plot(fig, plot_path)
 
         print(f"3D plot of best accuracies for {target} saved to: {plot_path}")
