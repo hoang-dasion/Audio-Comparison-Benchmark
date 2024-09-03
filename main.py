@@ -42,6 +42,28 @@ def load_and_merge_data(label_files, feature_subsets):
     
     return merged_data
 
+def display_options(options, title):
+    print(f"\n{title}:")
+    for i, option in enumerate(options, 1):
+        print(f"{i}. {option}")
+    print(f"{len(options) + 1}. All")
+
+def get_user_selection(options, prompt):
+    while True:
+        try:
+            user_input = input(prompt).strip().lower()
+            if user_input == 'all':
+                return options
+            selections = [int(x) for x in user_input.split()]
+            if all(1 <= s <= len(options) + 1 for s in selections):
+                if len(options) + 1 in selections:
+                    return options
+                return [options[i - 1] for i in selections]
+            else:
+                raise ValueError
+        except ValueError:
+            print("Invalid input. Please enter numbers separated by spaces or 'all'.")
+
 def main(args):
     print("Checking audio files...")
     wav_files = check_audio_files(args.audio_path)
@@ -57,12 +79,26 @@ def main(args):
 
     all_results = {target: {} for target in TARGET_COLUMNS}
 
-    algorithms_to_process = args.algorithms if args.algorithms else list(AUDIO_ALGORITHMS.keys())
+    # User selection for audio algorithms
+    if args.audio_algorithms:
+        display_options(list(AUDIO_ALGORITHMS.keys()), "Available Audio Algorithms")
+        algorithms_to_process = get_user_selection(list(AUDIO_ALGORITHMS.keys()), "Enter the numbers of the audio algorithms you want to use (space-separated) or 'all': ")
+    else:
+        algorithms_to_process = list(AUDIO_ALGORITHMS.keys())
+        print("Using all available audio algorithms.")
 
     for algorithm in algorithms_to_process:
         print(f"\nProcessing algorithm: {algorithm}")
         try:
-            feature_subsets = audio_processor.run_analysis(algorithm, args.audio_path, force_reprocess=args.force_reprocess)
+            # User selection for feature extraction methods
+            if args.feature_methods:
+                display_options(AUDIO_ALGORITHMS[algorithm]['features'], f"Available Feature Extraction Methods for {algorithm}")
+                selected_features = get_user_selection(AUDIO_ALGORITHMS[algorithm]['features'], "Enter the numbers of the feature extraction methods you want to use (space-separated) or 'all': ")
+            else:
+                selected_features = AUDIO_ALGORITHMS[algorithm]['features']
+                print(f"Using all available feature extraction methods for {algorithm}.")
+
+            feature_subsets = audio_processor.run_analysis(algorithm, args.audio_path, selected_features, force_reprocess=args.force_reprocess)
 
             if feature_subsets.empty:
                 print(f"No features extracted for {algorithm}. Skipping this algorithm.")
@@ -92,9 +128,17 @@ def main(args):
                 y_dev_target = y_dev[target]
                 y_test_target = y_test[target]
 
+                # User selection for ML algorithms
+                if args.ml_algorithms:
+                    display_options(list(ML_ALGORITHMS.keys()), "Available ML Algorithms")
+                    selected_ml_algorithms = get_user_selection(list(ML_ALGORITHMS.keys()), "Enter the numbers of the ML algorithms you want to use (space-separated) or 'all': ")
+                else:
+                    selected_ml_algorithms = list(ML_ALGORITHMS.keys())
+                    print("Using all available ML algorithms.")
+
                 ml_results = ml_processor.run_ml_pipeline(
                     X_train_selected, y_train_target, X_dev_selected, y_dev_target, X_test_selected, y_test_target, 
-                    list(ML_ALGORITHMS.keys()), algorithm=algorithm, sub_algorithm=target, target=target, use_cache=args.use_cache
+                    selected_ml_algorithms, algorithm=algorithm, sub_algorithm=target, target=target, use_cache=args.use_cache
                 )
 
                 if algorithm not in all_results[target]:
@@ -103,33 +147,48 @@ def main(args):
                     all_results[target][algorithm][feature] = ml_results
 
                 print(f"Features used for {algorithm}, {target}:", all_results[target][algorithm].keys())
+                
+            for target in TARGET_COLUMNS:
+                print(f"\nGenerating 3D plot for {target}...")
+                plot_path = os.path.join(args.ml_output_dir, f"best_accuracies_3d_plot_{target}.png")
+                best_combo = MLPlot.plot_best_accuracies_3d(all_results[target], args.ml_output_dir, target)
+                if best_combo:
+                    print(f"Best combination for {target}: {best_combo}")
+                    print(f"\nBest overall combination for {target}:")
+                    print(f"Feature Extraction Algorithm: {best_combo['algo']}")
+                    print(f"Feature Extraction Method: {best_combo['feature']}")
+                    print(f"ML Algorithm: {best_combo['model']}")
+                    print(f"Accuracy: {best_combo['accuracy']:.4f}")
+                    print(f"3D plot saved to: {plot_path}")
+                else:
+                    print(f"No valid data to determine the best combination for {target}.")
 
         except Exception as e:
             print(f"Error processing algorithm {algorithm}: {str(e)}")
             continue
 
-    for target in TARGET_COLUMNS:
-        print(f"\nGenerating 3D plot for {target}...")
-        best_combo = MLPlot.plot_best_accuracies_3d(all_results[target], args.ml_output_dir, target)
-        if best_combo:
-            print(f"Best combination for {target}: {best_combo}")
-            print(f"\nBest overall combination for {target}:")
-            print(f"Feature Extraction Algorithm: {best_combo['algo']}")
-            print(f"Feature Extraction Method: {best_combo['feature']}")
-            print(f"ML Algorithm: {best_combo['model']}")
-            print(f"Accuracy: {best_combo['accuracy']:.4f}")
-        else:
-            print(f"No valid data to determine the best combination for {target}.")
-
 if __name__ == "__main__":
+    
+    # REQUIRED
     parser = argparse.ArgumentParser(description="Run audio processing and ML pipeline.")
-    parser.add_argument("--algorithms", nargs='+', default=None,
-                        choices=list(AUDIO_ALGORITHMS.keys()),
-                        help="Audio processing algorithms (default: all)")
     parser.add_argument("--audio_path", type=str, required=True, help="Path to audio files directory")
-    parser.add_argument("--ml_output_dir", type=str, default="./output", help="Output directory for ML results")
+    
+    # OPTIONAL
+    parser.add_argument("--ml_output_dir", type=str, default="./output/plots", help="Output directory for ML results")
     parser.add_argument("--force_reprocess", action="store_true", help="Force reprocessing of audio files even if output exists")
     parser.add_argument("--no_cache", action="store_false", dest="use_cache", default=True,
                         help="Disable using cached ML models (caching is enabled by default)")
+    parser.add_argument("--audio_algorithms", action="store_true", 
+                        help="Enable selection of audio algorithms. If not specified, all algorithms will be used.")
+    parser.add_argument("--feature_methods", action="store_true", 
+                        help="Enable selection of feature extraction methods. If not specified, all methods will be used.")
+    parser.add_argument("--ml_algorithms", action="store_true", 
+                        help="Enable selection of ML algorithms. If not specified, all algorithms will be used.")
+    parser.add_argument("--default", action="store_true", 
+                        help="Use all default options without prompts. This overrides --audio_algorithms, --feature_methods, and --ml_algorithms.")
     args = parser.parse_args()
+
+    if args.default:
+        args.audio_algorithms = args.feature_methods = args.ml_algorithms = False
+
     main(args)

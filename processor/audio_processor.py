@@ -25,8 +25,8 @@ class AudioProcessor:
             algorithms[algo_name] = algo_class()
         return algorithms
 
-    def run_analysis(self, algorithm, audio_path, force_reprocess=False):
-        feature_names = AUDIO_ALGORITHMS[algorithm]['features']
+    def run_analysis(self, algorithm, audio_path, selected_features=None, force_reprocess=False):
+        feature_names = selected_features or AUDIO_ALGORITHMS[algorithm]['features']
         output_file = os.path.join(self.output_dir, f"{algorithm}_features.csv")
 
         if os.path.exists(output_file) and not force_reprocess:
