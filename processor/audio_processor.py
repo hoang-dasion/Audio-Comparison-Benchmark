@@ -23,7 +23,7 @@ class AudioProcessor:
         self.wavelet = Wavelet()
         self.energy_intensity = EnergyIntensity()
         self.label_data = None
-        self.output_dir = "./ml_output/features"
+        self.output_dir = "./output/features"
         self.lock = threading.Lock()
 
     def run_analysis(self, algorithm, audio_path, force_reprocess=False):

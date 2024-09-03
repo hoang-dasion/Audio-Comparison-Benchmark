@@ -69,9 +69,7 @@ class MLPlot:
 
     @classmethod
     def plot_best_accuracies_3d(cls, all_results, output_dir, target):
-        logging.info(f"Starting to plot 3D accuracies for {target}")
-
-        fig = plt.figure(figsize=(20, 15))
+        fig = plt.figure(figsize=(20, 15), dpi=300)
         ax = fig.add_subplot(111, projection='3d')
 
         algorithms = list(all_results.keys())
@@ -80,15 +78,18 @@ class MLPlot:
             all_features.update(algo_results.keys())
         all_features = sorted(list(all_features))
 
-        x = np.arange(len(algorithms))
-        y = np.arange(len(all_features))
-        xx, yy = np.meshgrid(x, y)
+        xpos = np.arange(len(algorithms))
+        ypos = np.arange(len(all_features))
+        xposM, yposM = np.meshgrid(xpos, ypos, copy=False)
 
-        dx = dy = 0.7
-        zz = np.zeros((len(all_features), len(algorithms)))
+        zpos = np.zeros((len(all_features), len(algorithms)))
         best_combo = {"algo": "", "feature": "", "model": "", "accuracy": 0}
 
-        color_palette = COLOR_BARS
+        dx = dy = 0.6
+        dz = zpos.ravel()
+        values = np.linspace(0.2, 1., xposM.ravel().shape[0])
+        colors = cm.rainbow(values)
+
         for i, algo in enumerate(algorithms):
             for j, feature in enumerate(all_features):
                 if feature in all_results[algo]:
@@ -96,7 +97,7 @@ class MLPlot:
                     if valid_results:
                         best_model = max(valid_results, key=lambda x: x[1]['test_accuracy'])
                         accuracy = best_model[1]['test_accuracy']
-                        zz[j, i] = accuracy
+                        zpos[j, i] = accuracy
                         if accuracy > best_combo["accuracy"]:
                             best_combo = {
                                 "algo": algo,
@@ -105,47 +106,39 @@ class MLPlot:
                                 "accuracy": accuracy
                             }
 
-                        ax.bar3d(xx[j, i], yy[j, i], 0, dx, dy, accuracy, shade=True, 
-                                color=color_palette[i % len(color_palette)], alpha=0.8)
+        bars = ax.bar3d(xposM.ravel(), yposM.ravel(), np.zeros_like(dz), dx, dy, dz, shade=True, color=colors)
 
         ax.set_xlabel('Feature Extraction Algorithms', fontsize=14, labelpad=20)
         ax.set_ylabel('Feature Extraction Methods', fontsize=14, labelpad=20)
         ax.set_zlabel('Test Accuracy', fontsize=14, labelpad=20)
 
-        ax.set_xticks(x + dx/2)
-        ax.set_xticklabels(algorithms, rotation=45, ha='right', fontsize=10)
+        ax.set_xticks(xpos + dx/2)
+        ax.set_xticklabels(algorithms, rotation=45, ha='right', fontsize=12)
 
-        ax.set_yticks(y + dy/2)
+        ax.set_yticks(ypos + dy/2)
         ax.set_yticklabels(all_features, fontsize=8)
 
         ax.set_title(f'Test Accuracy for Different Feature Extraction Combinations - {target}', fontsize=16)
 
         # Highlight the best combination
-        if best_combo["accuracy"] > 0:
-            best_x = algorithms.index(best_combo["algo"])
-            best_y = all_features.index(best_combo["feature"])
-            ax.bar3d(best_x, best_y, 0, dx, dy, best_combo["accuracy"], color='#FF0000', alpha=1)
+        best_x = algorithms.index(best_combo["algo"])
+        best_y = all_features.index(best_combo["feature"])
+        ax.bar3d(best_x, best_y, 0, dx, dy, best_combo["accuracy"], color='red', alpha=1)
 
-            ax.text(best_x + dx/2, best_y + dy/2, best_combo["accuracy"] + 0.05, 
-                    f"Best: {best_combo['algo']},\n{best_combo['feature']},\n{best_combo['model']},\n{best_combo['accuracy']:.4f}\n\n",
-                    color='#FF0000', fontweight='bold', ha='center', va='bottom', fontsize=10)
-
-        # Add a color legend
-        legend_elements = [plt.Rectangle((0,0),1,1, facecolor=color_palette[i % len(color_palette)], edgecolor='none', alpha=0.8) 
-                           for i in range(len(algorithms))]
-        ax.legend(legend_elements, algorithms, loc='upper left', bbox_to_anchor=(1.05, 1), fontsize=10)
+        ax.text(best_x + dx/2, best_y + dy/2, best_combo["accuracy"] + 0.05,
+                f"Best: {best_combo['algo']},\n{best_combo['feature']},\n{best_combo['model']},\n{best_combo['accuracy']:.4f}\n\n\n\n",
+                color='red', fontweight='bold', ha='center', va='bottom', fontsize=10)
 
         ax.view_init(elev=20, azim=45)
 
-        plt.tight_layout()
         plot_path = f"{output_dir}/best_accuracies_3d_plot_{target}.png"
         cls.save_plot(fig, plot_path)
 
-        logging.info(f"3D plot of best accuracies for {target} saved to: {plot_path}")
+        print(f"3D plot of best accuracies for {target} saved to: {plot_path}")
+        print(f"\nBest overall combination for {target}:")
+        print(f"Feature Extraction Algorithm: {best_combo['algo']}")
+        print(f"Feature Extraction Method: {best_combo['feature']}")
+        print(f"ML Algorithm: {best_combo['model']}")
+        print(f"Accuracy: {best_combo['accuracy']:.4f}")
 
-        if best_combo["accuracy"] == 0:
-            logging.warning(f"No valid accuracy data found for {target}")
-            return None
-
-        logging.info(f"Best overall combination for {target}: {best_combo}")
         return best_combo

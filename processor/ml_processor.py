@@ -5,7 +5,6 @@ from sklearn.model_selection import train_test_split, cross_val_score, Stratifie
 from sklearn.metrics import accuracy_score, confusion_matrix
 from utils import get_models
 from plot.ml_plot import MLPlot
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 class MLProcessor:
     def __init__(self, output_dir='ML'):
@@ -68,28 +67,28 @@ class MLProcessor:
     def run_ml_pipeline(self, X_train, y_train, X_dev, y_dev, X_test, y_test, selected_models, algorithm='', sub_algorithm='', target='', use_cache=False):
         results = {}
         
-        with ThreadPoolExecutor(max_workers=min(len(selected_models), os.cpu_count())) as executor:
-            future_to_model = {executor.submit(self.train_and_predict, X_train, y_train, X_dev, y_dev, X_test, y_test, model_name, algorithm, sub_algorithm, target, use_cache): model_name for model_name in selected_models}
-            
-            for future in as_completed(future_to_model):
-                model_name = future_to_model[future]
-                try:
-                    model, train_accuracy, dev_accuracy, test_accuracy = future.result()
-                    results[model_name] = {
-                        'train_accuracy': train_accuracy,
-                        'dev_accuracy': dev_accuracy,
-                        'test_accuracy': test_accuracy,
-                        'model': model
-                    }
-                except Exception as e:
-                    print(f"Error occurred while training {model_name}: {str(e)}")
-                    results[model_name] = {
-                        'train_accuracy': None,
-                        'dev_accuracy': None,
-                        'test_accuracy': None,
-                        'model': None,
-                        'error': str(e)
-                    }
+        for model_name in selected_models:
+            try:
+                model, train_accuracy, dev_accuracy, test_accuracy = self.train_and_predict(
+                    X_train, y_train, X_dev, y_dev, X_test, y_test, model_name, 
+                    algorithm=algorithm, sub_algorithm=sub_algorithm, target=target, use_cache=use_cache
+                )
+
+                results[model_name] = {
+                    'train_accuracy': train_accuracy,
+                    'dev_accuracy': dev_accuracy,
+                    'test_accuracy': test_accuracy,
+                    'model': model
+                }
+            except Exception as e:
+                print(f"Error occurred while training {model_name}: {str(e)}")
+                results[model_name] = {
+                    'train_accuracy': None,
+                    'dev_accuracy': None,
+                    'test_accuracy': None,
+                    'model': None,
+                    'error': str(e)
+                }
 
         plot_output_dir = f"{self.output_dir}/plots/{algorithm}/{sub_algorithm}/accuracy"
         MLPlot.plot_grouped_accuracy_comparison(
