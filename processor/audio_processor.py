@@ -1,5 +1,3 @@
-# audio_processor.py
-
 import os
 import numpy as np
 import pandas as pd
@@ -50,6 +48,7 @@ class AudioProcessor:
         print(f"Unique Participant_IDs in features: {features['Participant_ID'].nunique()}")
         return features
 
+    # Inherited and adapted from Oscar's daic_woz_prep.py
     def process_audio_files(self, algorithm, feature_names, audio_path):
         if os.path.isdir(audio_path):
             audio_files = glob(os.path.join(audio_path, "*.wav"))

@@ -1,5 +1,3 @@
-# const.py
-
 AUDIO_ALGORITHMS = {
     'time_domain': {
         'class': 'TimeDomain',
