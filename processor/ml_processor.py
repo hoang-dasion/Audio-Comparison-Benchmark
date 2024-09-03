@@ -3,23 +3,35 @@ import pickle
 import numpy as np
 from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
 from sklearn.metrics import accuracy_score, confusion_matrix
-from utils import get_models
+from const import ML_ALGORITHMS
 from plot.ml_plot import MLPlot
+import importlib
 
 class MLProcessor:
     def __init__(self, output_dir='ML'):
         self.output_dir = output_dir
-        self.models = get_models(output_dir)
+        self.models = self._load_models()
         self.cache_dir = os.path.join(output_dir, 'cached_models')
         os.makedirs(self.cache_dir, exist_ok=True)
 
+    def _load_models(self):
+        models = {}
+        for model_name, model_info in ML_ALGORITHMS.items():
+            module = importlib.import_module(f"ml_algorithm.{model_info['file'][:-3]}")
+            model_class = getattr(module, model_info['class'])
+            params_file = f"{model_name.lower().replace(' ', '_')}_params.json"
+            models[model_name] = model_class(params_file)
+        return models
+
     def save_model(self, model, model_name, algorithm, sub_algorithm, target):
-        model_path = os.path.join(self.cache_dir, f"{algorithm}_{sub_algorithm}_{target}_{model_name}.pkl")
+        model_filename = f"{algorithm}_{sub_algorithm}_{target}_{model_name.lower().replace(' ', '_')}.pkl"
+        model_path = os.path.join(self.cache_dir, model_filename)
         with open(model_path, 'wb') as f:
             pickle.dump(model, f)
 
     def load_model(self, model_name, algorithm, sub_algorithm, target):
-        model_path = os.path.join(self.cache_dir, f"{algorithm}_{sub_algorithm}_{target}_{model_name}.pkl")
+        model_filename = f"{algorithm}_{sub_algorithm}_{target}_{model_name.lower().replace(' ', '_')}.pkl"
+        model_path = os.path.join(self.cache_dir, model_filename)
         if os.path.exists(model_path):
             with open(model_path, 'rb') as f:
                 return pickle.load(f)
@@ -58,6 +70,7 @@ class MLProcessor:
         cm_test = confusion_matrix(y_test, y_pred_test)
         classes = np.unique(np.concatenate([y_train, y_dev, y_test]))
 
+        os.makedirs(f"{base_dir}/confusion_matrix", exist_ok=True)
         MLPlot.plot_confusion_matrix(cm_train, classes, f"{base_dir}/confusion_matrix/{model_name}_train_cm.png")
         MLPlot.plot_confusion_matrix(cm_dev, classes, f"{base_dir}/confusion_matrix/{model_name}_dev_cm.png")
         MLPlot.plot_confusion_matrix(cm_test, classes, f"{base_dir}/confusion_matrix/{model_name}_test_cm.png")
@@ -91,6 +104,7 @@ class MLProcessor:
                 }
 
         plot_output_dir = f"{self.output_dir}/plots/{algorithm}/{sub_algorithm}/accuracy"
+        os.makedirs(plot_output_dir, exist_ok=True)
         MLPlot.plot_grouped_accuracy_comparison(
             [results[model]['train_accuracy'] for model in selected_models if results[model]['train_accuracy'] is not None],
             [results[model]['dev_accuracy'] for model in selected_models if results[model]['dev_accuracy'] is not None],

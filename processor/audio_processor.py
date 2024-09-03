@@ -1,33 +1,34 @@
+# audio_processor.py
+
 import os
 import numpy as np
 import pandas as pd
 import librosa
 from glob import glob
-from const import FEATURES_DIC
-from audio_algorithm.time_domain import TimeDomain
-from audio_algorithm.fourier import Fourier
-from audio_algorithm.short_fourier import ShortFourier
-from audio_algorithm.wavelet import Wavelet
-from audio_algorithm.energy_intensity import EnergyIntensity
 from tqdm import tqdm
 import itertools
 import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
+from const import AUDIO_ALGORITHMS
+import importlib
 
 class AudioProcessor:
     def __init__(self):
-        self.time_domain = TimeDomain()
-        self.fourier = Fourier()
-        self.short_fourier = ShortFourier()
-        self.wavelet = Wavelet()
-        self.energy_intensity = EnergyIntensity()
-        self.label_data = None
+        self.algorithms = self._load_algorithms()
         self.output_dir = "./output/features"
         self.lock = threading.Lock()
 
+    def _load_algorithms(self):
+        algorithms = {}
+        for algo_name, algo_info in AUDIO_ALGORITHMS.items():
+            module = importlib.import_module(f"audio_algorithm.{algo_info['file'][:-3]}")
+            algo_class = getattr(module, algo_info['class'])
+            algorithms[algo_name] = algo_class()
+        return algorithms
+
     def run_analysis(self, algorithm, audio_path, force_reprocess=False):
-        feature_names = FEATURES_DIC[algorithm]
+        feature_names = AUDIO_ALGORITHMS[algorithm]['features']
         output_file = os.path.join(self.output_dir, f"{algorithm}_features.csv")
 
         if os.path.exists(output_file) and not force_reprocess:
@@ -58,15 +59,12 @@ class AudioProcessor:
             print(f"Invalid audio path: {audio_path}")
             return pd.DataFrame()
 
-        all_features = []
-        for wav_file in tqdm(audio_files, desc="Processing audio files"):
-            try:
-                features = self.process_single_audio_file(algorithm, feature_names, wav_file)
-                if features:
-                    all_features.append(features)
-            except Exception as e:
-                print(f"Error processing file {wav_file}: {str(e)}")
+        with ThreadPoolExecutor() as executor:
+            futures = [executor.submit(self.process_single_audio_file, algorithm, feature_names, wav_file) 
+                       for wav_file in audio_files]
+            all_features = [future.result() for future in tqdm(as_completed(futures), total=len(audio_files), desc="Processing audio files")]
 
+        all_features = [f for f in all_features if f is not None]
         if not all_features:
             return pd.DataFrame()
 
@@ -88,18 +86,7 @@ class AudioProcessor:
             return None
 
     def extract_feature(self, algorithm, feature_name, audio_file):
-        if algorithm == 'time_domain':
-            return self.time_domain.extract(feature_name, audio_file)
-        elif algorithm == 'fourier':
-            return self.fourier.extract(feature_name, audio_file)
-        elif algorithm == 'short_fourier':
-            return self.short_fourier.extract(feature_name, audio_file)
-        elif algorithm == 'wavelet':
-            return self.wavelet.extract(feature_name, audio_file)
-        elif algorithm == 'energy_intensity':
-            return self.energy_intensity.extract(feature_name, audio_file)
-        else:
-            raise ValueError(f"Unknown algorithm: {algorithm}")
+        return self.algorithms[algorithm].extract(feature_name, audio_file)
 
     def create_all_feature_combinations(self, individual_features, feature_names):
         all_combinations = []

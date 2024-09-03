@@ -10,14 +10,17 @@ class MLModel:
         self.hyperparams = self.load_params()
 
     def load_params(self):
-        os.makedirs(os.path.dirname(self.params_file), exist_ok=True)
-        if not os.path.exists(self.params_file):
-            print(f"File {self.params_file} not found. Creating with default parameters.")
+        dir_name = ''.join(['_'+c.lower() if c.isupper() else c for c in self.model_class.__name__]).lstrip('_')
+        params_dir = os.path.join('ml_algorithm', 'params', dir_name)
+        os.makedirs(params_dir, exist_ok=True)
+        params_path = os.path.join(params_dir, self.params_file)
+        if not os.path.exists(params_path):
+            print(f"File {params_path} not found. Creating with default parameters.")
             default_params = {}
-            with open(self.params_file, 'w') as f:
+            with open(params_path, 'w') as f:
                 json.dump(default_params, f, indent=4)
 
-        with open(self.params_file, 'r') as f:
+        with open(params_path, 'r') as f:
             return json.load(f)
 
     def create_pipeline(self):

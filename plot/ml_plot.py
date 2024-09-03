@@ -141,3 +141,4 @@ class MLPlot:
         print(f"Accuracy: {best_combo['accuracy']:.4f}")
 
         return best_combo
+    

@@ -16,14 +16,10 @@ ENV/
 .ipynb_checkpoints
 
 # Project-specific
-ml_output/cached_models
-ml_output/features
-ml_output/*.json
 test_audio/
 cached_models/
 
 # Data files
-*.csv
 *.wav
 
 # macOS
