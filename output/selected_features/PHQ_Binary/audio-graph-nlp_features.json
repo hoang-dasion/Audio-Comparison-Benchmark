@@ -1,0 +1,1 @@
+["(mel, chroma, spectral_contrast)", "frequency_spectrum", "(mel, mfcc, spectral_centroid)", "(chroma, spectral_rolloff)", "(frequency_spectrum, cepstrum, magnitude_spectrum)", "(cepstrum, magnitude_spectrum, phase_spectrum)", "(magnitude_spectrum, phase_spectrum)", "(cepstrum, phase_spectrum)", "magnitude_spectrum", "(mfcc, zcr)"]

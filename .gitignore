@@ -21,6 +21,7 @@ cached_models/
 
 # Data files
 *.wav
+*.csv
 
 # macOS
 .DS_Store
@@ -30,10 +31,13 @@ cached_models/
 
 # Temporary files
 *.tmp
+*.txt
+*.zip
 
 # Model files
 *.pkl
 *.h5
+*.joblib
 
 # Compiled source
 *.com

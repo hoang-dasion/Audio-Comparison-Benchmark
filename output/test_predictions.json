@@ -1,0 +1,706 @@
+{
+    "PHQ_Binary": {
+        "audio": {
+            "SVM": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Random Forest": {
+                "D1": 0,
+                "D2": 1,
+                "M1": 0,
+                "S1": 1
+            },
+            "Gradient Boosting": {
+                "D1": 0,
+                "D2": 1,
+                "M1": 0,
+                "S1": 1
+            },
+            "K-Nearest Neighbors": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Logistic Regression": {
+                "D1": 1,
+                "D2": 1,
+                "M1": 1,
+                "S1": 1
+            },
+            "Naive Bayes": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Decision Tree": {
+                "D1": 0,
+                "D2": 1,
+                "M1": 0,
+                "S1": 1
+            },
+            "Multi-layer Perceptron": {
+                "D1": 1,
+                "D2": 1,
+                "M1": 1,
+                "S1": 1
+            }
+        },
+        "nlp": {
+            "SVM": {
+                "M1": 0,
+                "D1": 0,
+                "D2": 0,
+                "S1": 0
+            },
+            "Random Forest": {
+                "M1": 0,
+                "D1": 0,
+                "D2": 1,
+                "S1": 0
+            },
+            "Gradient Boosting": {
+                "M1": 0,
+                "D1": 0,
+                "D2": 1,
+                "S1": 0
+            },
+            "K-Nearest Neighbors": {
+                "M1": 0,
+                "D1": 1,
+                "D2": 0,
+                "S1": 1
+            },
+            "Logistic Regression": {
+                "M1": 1,
+                "D1": 1,
+                "D2": 1,
+                "S1": 1
+            },
+            "Naive Bayes": {
+                "M1": 0,
+                "D1": 0,
+                "D2": 0,
+                "S1": 0
+            },
+            "Decision Tree": {
+                "M1": 0,
+                "D1": 0,
+                "D2": 1,
+                "S1": 0
+            },
+            "Multi-layer Perceptron": {
+                "M1": 1,
+                "D1": 1,
+                "D2": 1,
+                "S1": 1
+            }
+        },
+        "graph": {
+            "SVM": {
+                "M1": 0,
+                "S1": 0,
+                "D2": 0,
+                "D1": 0
+            },
+            "Random Forest": {
+                "M1": 0,
+                "S1": 0,
+                "D2": 0,
+                "D1": 1
+            },
+            "Gradient Boosting": {
+                "M1": 0,
+                "S1": 0,
+                "D2": 0,
+                "D1": 1
+            },
+            "K-Nearest Neighbors": {
+                "M1": 0,
+                "S1": 0,
+                "D2": 0,
+                "D1": 0
+            },
+            "Logistic Regression": {
+                "M1": 0,
+                "S1": 0,
+                "D2": 0,
+                "D1": 0
+            },
+            "Naive Bayes": {
+                "M1": 0,
+                "S1": 0,
+                "D2": 0,
+                "D1": 0
+            },
+            "Decision Tree": {
+                "M1": 0,
+                "S1": 0,
+                "D2": 0,
+                "D1": 0
+            },
+            "Multi-layer Perceptron": {
+                "M1": 0,
+                "S1": 0,
+                "D2": 0,
+                "D1": 0
+            }
+        },
+        "audio-nlp": {
+            "SVM": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Random Forest": {
+                "D1": 1,
+                "D2": 1,
+                "M1": 1,
+                "S1": 1
+            },
+            "Gradient Boosting": {
+                "D1": 1,
+                "D2": 1,
+                "M1": 1,
+                "S1": 0
+            },
+            "K-Nearest Neighbors": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Logistic Regression": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Naive Bayes": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Decision Tree": {
+                "D1": 1,
+                "D2": 1,
+                "M1": 0,
+                "S1": 1
+            },
+            "Multi-layer Perceptron": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            }
+        },
+        "audio-graph": {
+            "SVM": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Random Forest": {
+                "D1": 0,
+                "D2": 1,
+                "M1": 0,
+                "S1": 1
+            },
+            "Gradient Boosting": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 1
+            },
+            "K-Nearest Neighbors": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Logistic Regression": {
+                "D1": 1,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Naive Bayes": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Decision Tree": {
+                "D1": 0,
+                "D2": 1,
+                "M1": 0,
+                "S1": 1
+            },
+            "Multi-layer Perceptron": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            }
+        },
+        "graph-nlp": {
+            "SVM": {
+                "M1": 0,
+                "D1": 0,
+                "D2": 0,
+                "S1": 0
+            },
+            "Random Forest": {
+                "M1": 0,
+                "D1": 0,
+                "D2": 0,
+                "S1": 0
+            },
+            "Gradient Boosting": {
+                "M1": 0,
+                "D1": 0,
+                "D2": 0,
+                "S1": 0
+            },
+            "K-Nearest Neighbors": {
+                "M1": 0,
+                "D1": 0,
+                "D2": 0,
+                "S1": 0
+            },
+            "Logistic Regression": {
+                "M1": 0,
+                "D1": 0,
+                "D2": 0,
+                "S1": 0
+            },
+            "Naive Bayes": {
+                "M1": 0,
+                "D1": 0,
+                "D2": 0,
+                "S1": 0
+            },
+            "Decision Tree": {
+                "M1": 0,
+                "D1": 0,
+                "D2": 0,
+                "S1": 0
+            },
+            "Multi-layer Perceptron": {
+                "M1": 1,
+                "D1": 1,
+                "D2": 1,
+                "S1": 1
+            }
+        },
+        "audio-graph-nlp": {
+            "SVM": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Random Forest": {
+                "D1": 0,
+                "D2": 1,
+                "M1": 0,
+                "S1": 1
+            },
+            "Gradient Boosting": {
+                "D1": 0,
+                "D2": 1,
+                "M1": 1,
+                "S1": 1
+            },
+            "K-Nearest Neighbors": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Logistic Regression": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Naive Bayes": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Decision Tree": {
+                "D1": 0,
+                "D2": 1,
+                "M1": 0,
+                "S1": 1
+            },
+            "Multi-layer Perceptron": {
+                "D1": 1,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            }
+        }
+    },
+    "PCL-C (PTSD)": {
+        "audio": {
+            "SVM": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Random Forest": {
+                "D1": 0,
+                "D2": 1,
+                "M1": 0,
+                "S1": 1
+            },
+            "Gradient Boosting": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 1
+            },
+            "K-Nearest Neighbors": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Logistic Regression": {
+                "D1": 1,
+                "D2": 1,
+                "M1": 1,
+                "S1": 1
+            },
+            "Naive Bayes": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Decision Tree": {
+                "D1": 1,
+                "D2": 1,
+                "M1": 1,
+                "S1": 1
+            },
+            "Multi-layer Perceptron": {
+                "D1": 1,
+                "D2": 1,
+                "M1": 1,
+                "S1": 1
+            }
+        },
+        "nlp": {
+            "SVM": {
+                "M1": 0,
+                "D1": 0,
+                "D2": 0,
+                "S1": 0
+            },
+            "Random Forest": {
+                "M1": 0,
+                "D1": 0,
+                "D2": 0,
+                "S1": 0
+            },
+            "Gradient Boosting": {
+                "M1": 1,
+                "D1": 1,
+                "D2": 1,
+                "S1": 1
+            },
+            "K-Nearest Neighbors": {
+                "M1": 0,
+                "D1": 0,
+                "D2": 0,
+                "S1": 0
+            },
+            "Logistic Regression": {
+                "M1": 0,
+                "D1": 1,
+                "D2": 0,
+                "S1": 0
+            },
+            "Naive Bayes": {
+                "M1": 0,
+                "D1": 1,
+                "D2": 0,
+                "S1": 0
+            },
+            "Decision Tree": {
+                "M1": 1,
+                "D1": 1,
+                "D2": 1,
+                "S1": 1
+            },
+            "Multi-layer Perceptron": {
+                "M1": 1,
+                "D1": 1,
+                "D2": 1,
+                "S1": 1
+            }
+        },
+        "graph": {
+            "SVM": {
+                "M1": 0,
+                "S1": 0,
+                "D2": 0,
+                "D1": 0
+            },
+            "Random Forest": {
+                "M1": 0,
+                "S1": 0,
+                "D2": 0,
+                "D1": 1
+            },
+            "Gradient Boosting": {
+                "M1": 0,
+                "S1": 0,
+                "D2": 0,
+                "D1": 1
+            },
+            "K-Nearest Neighbors": {
+                "M1": 0,
+                "S1": 0,
+                "D2": 0,
+                "D1": 0
+            },
+            "Logistic Regression": {
+                "M1": 0,
+                "S1": 0,
+                "D2": 0,
+                "D1": 0
+            },
+            "Naive Bayes": {
+                "M1": 0,
+                "S1": 0,
+                "D2": 0,
+                "D1": 0
+            },
+            "Decision Tree": {
+                "M1": 0,
+                "S1": 0,
+                "D2": 0,
+                "D1": 0
+            },
+            "Multi-layer Perceptron": {
+                "M1": 0,
+                "S1": 0,
+                "D2": 0,
+                "D1": 0
+            }
+        },
+        "audio-nlp": {
+            "SVM": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Random Forest": {
+                "D1": 0,
+                "D2": 1,
+                "M1": 0,
+                "S1": 1
+            },
+            "Gradient Boosting": {
+                "D1": 1,
+                "D2": 1,
+                "M1": 1,
+                "S1": 1
+            },
+            "K-Nearest Neighbors": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Logistic Regression": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Naive Bayes": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Decision Tree": {
+                "D1": 1,
+                "D2": 1,
+                "M1": 1,
+                "S1": 1
+            },
+            "Multi-layer Perceptron": {
+                "D1": 1,
+                "D2": 1,
+                "M1": 1,
+                "S1": 1
+            }
+        },
+        "audio-graph": {
+            "SVM": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Random Forest": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 1
+            },
+            "Gradient Boosting": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 1
+            },
+            "K-Nearest Neighbors": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Logistic Regression": {
+                "D1": 1,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Naive Bayes": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Decision Tree": {
+                "D1": 1,
+                "D2": 1,
+                "M1": 1,
+                "S1": 1
+            },
+            "Multi-layer Perceptron": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            }
+        },
+        "graph-nlp": {
+            "SVM": {
+                "M1": 0,
+                "D1": 0,
+                "D2": 0,
+                "S1": 0
+            },
+            "Random Forest": {
+                "M1": 0,
+                "D1": 1,
+                "D2": 1,
+                "S1": 1
+            },
+            "Gradient Boosting": {
+                "M1": 1,
+                "D1": 1,
+                "D2": 1,
+                "S1": 1
+            },
+            "K-Nearest Neighbors": {
+                "M1": 1,
+                "D1": 0,
+                "D2": 0,
+                "S1": 0
+            },
+            "Logistic Regression": {
+                "M1": 1,
+                "D1": 0,
+                "D2": 1,
+                "S1": 1
+            },
+            "Naive Bayes": {
+                "M1": 1,
+                "D1": 0,
+                "D2": 0,
+                "S1": 0
+            },
+            "Decision Tree": {
+                "M1": 1,
+                "D1": 1,
+                "D2": 1,
+                "S1": 1
+            },
+            "Multi-layer Perceptron": {
+                "M1": 1,
+                "D1": 1,
+                "D2": 1,
+                "S1": 1
+            }
+        },
+        "audio-graph-nlp": {
+            "SVM": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Random Forest": {
+                "D1": 0,
+                "D2": 1,
+                "M1": 1,
+                "S1": 1
+            },
+            "Gradient Boosting": {
+                "D1": 0,
+                "D2": 1,
+                "M1": 1,
+                "S1": 1
+            },
+            "K-Nearest Neighbors": {
+                "D1": 0,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Logistic Regression": {
+                "D1": 1,
+                "D2": 0,
+                "M1": 0,
+                "S1": 1
+            },
+            "Naive Bayes": {
+                "D1": 1,
+                "D2": 0,
+                "M1": 0,
+                "S1": 0
+            },
+            "Decision Tree": {
+                "D1": 1,
+                "D2": 1,
+                "M1": 1,
+                "S1": 1
+            },
+            "Multi-layer Perceptron": {
+                "D1": 1,
+                "D2": 1,
+                "M1": 1,
+                "S1": 1
+            }
+        }
+    }
+}
