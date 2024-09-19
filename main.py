@@ -7,7 +7,7 @@ from model_trainer import train_and_evaluate_models
 from predictor import predict_on_test_data
 from ml_plot import MLPlot
 from config import TARGET_COLUMNS
-from utils import setup_output_directories, save_json
+from utils import setup_output_directories, save_json, calculate_weighted_accuracies
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -42,37 +42,6 @@ def load_and_preprocess_data(data_path, is_training=True):
 
     return labels, feature_sets
 
-def calculate_weighted_accuracies(all_results):
-    weighted_accuracies = {}
-    for target, target_results in all_results.items():
-        weighted_accuracies[target] = {}
-        for combo, combo_results in target_results.items():
-            total_accuracy = sum(result['test_accuracy'] for result in combo_results.values())
-            weights = {algo: result['test_accuracy'] / total_accuracy 
-                       for algo, result in combo_results.items()}
-            
-            weighted_accuracies[target][combo] = {}
-            for algo, result in combo_results.items():
-                weighted_pred = np.array(result['test_pred']) * weights[algo]
-                weighted_accuracies[target][combo][algo] = weighted_pred.tolist()
-    return weighted_accuracies
-
-def calculate_f1_weighted_accuracies(all_results):
-    f1_weighted_accuracies = {}
-    for target, target_results in all_results.items():
-        f1_weighted_accuracies[target] = {}
-        for combo, combo_results in target_results.items():
-            total_f1 = sum(result['test_f1'] for result in combo_results.values())
-            weights = {algo: result['test_f1'] / total_f1 
-                       for algo, result in combo_results.items()}
-            
-            f1_weighted_accuracies[target][combo] = {}
-            for algo, result in combo_results.items():
-                weighted_pred = np.array(result['test_pred']) * weights[algo]
-                f1_weighted_accuracies[target][combo][algo] = weighted_pred.tolist()
-    
-    return f1_weighted_accuracies
-
 def main():
     args = parse_arguments()
     setup_output_directories()
@@ -91,7 +60,7 @@ def main():
 
     # Calculate weighted accuracies
     weighted_accuracies = calculate_weighted_accuracies(all_results)
-    f1_weighted_accuracies = calculate_f1_weighted_accuracies(all_results)
+    f1_weighted_accuracies = calculate_weighted_accuracies(all_results, metric='test_f1')
 
     # Generate plots
     logging.info("Generating plots...")

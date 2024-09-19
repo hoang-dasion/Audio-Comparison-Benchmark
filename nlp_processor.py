@@ -10,10 +10,7 @@ import warnings
 import argparse
 import re
 
-# Suppress specific warnings
 warnings.filterwarnings("ignore", category=FutureWarning, module="transformers.tokenization_utils_base")
-
-# Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Configure BERT

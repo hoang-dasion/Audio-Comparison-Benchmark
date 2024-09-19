@@ -7,6 +7,7 @@ from tqdm import tqdm
 from data_loader import combine_features, generate_feature_combinations
 from config import ML_ALGORITHMS, TARGET_COLUMNS
 import logging
+from utils import calculate_weighted_accuracies
 
 def load_selected_features(target, combo):
     features_file = f'./output/selected_features/{target}/{"-".join(sorted(combo))}_features.json'
@@ -23,6 +24,35 @@ def load_model(target, combo, algo_name):
 
 def predict_single_model(model, X_scaled):
     return model.predict(X_scaled)
+
+def ensemble_predict(all_predictions, weighted_accuracies):
+    THRESHOLD = 0.6
+    ensemble_predictions = {}
+    
+    for target, target_predictions in all_predictions.items():
+        ensemble_predictions[target] = {}
+        
+        for combo, combo_predictions in target_predictions.items():
+            weights = {algo: np.mean(weighted_accuracies[target][combo][algo]) 
+                       for algo in combo_predictions.keys()}
+            
+            # Normalize weights
+            total_weight = sum(weights.values())
+            normalized_weights = {algo: weight / total_weight for algo, weight in weights.items()}
+            
+            # Make final prediction
+            participant_ids = list(next(iter(combo_predictions.values())).keys())
+            ensemble_predictions[target][combo] = {}
+            for participant_id in participant_ids:
+                weighted_votes = sum(
+                    normalized_weights[algo] * prediction[participant_id]
+                    for algo, prediction in combo_predictions.items()
+                )
+                
+                # Final prediction is 1 if weighted vote is >= THRESHOLD, else 0
+                ensemble_predictions[target][combo][participant_id] = int(weighted_votes >= THRESHOLD)
+    
+    return ensemble_predictions
 
 def predict_on_test_data(test_feature_sets, all_results):
     all_predictions = {target: {} for target in TARGET_COLUMNS}
@@ -53,8 +83,12 @@ def predict_on_test_data(test_feature_sets, all_results):
             
             all_predictions[target]['-'.join(sorted(combo))] = combo_predictions
 
-    save_predictions(all_predictions)
+    weighted_accuracies = calculate_weighted_accuracies(all_results)
+    ensemble_predictions = ensemble_predict(all_predictions, weighted_accuracies)
 
-def save_predictions(all_predictions):
-    with open('./output/test_predictions.json', 'w', encoding='utf-8') as f:
-        json.dump(all_predictions, f, ensure_ascii=False, indent=4)
+    save_predictions(all_predictions)
+    save_predictions(ensemble_predictions, filename='ensemble_predictions.json')
+
+def save_predictions(predictions, filename='test_predictions.json'):
+    with open(os.path.join('./output', filename), 'w', encoding='utf-8') as f:
+        json.dump(predictions, f, ensure_ascii=False, indent=4)

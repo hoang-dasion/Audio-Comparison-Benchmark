@@ -95,10 +95,6 @@ class MLPlot:
         best_y = algorithms.index(best_algo)
         best_z = best_accuracy
 
-        # ax.quiver(label_x, label_y, label_z,
-        #           best_x - label_x, best_y - label_y, best_z - label_z,
-        #           color='red', arrow_length_ratio=0.1)
-        
         ax.text(label_x, label_y, label_z,
             f"Best Combination:\nFeature: {best_feature_combo}\nML Algo: {best_algo}\nWeighted Accuracy: {best_accuracy:.4f}",
             color='red', fontweight='bold', ha='center', va='bottom', fontsize=10, zorder=10)        
@@ -168,11 +164,23 @@ class MLPlot:
                     labels.append(f"{combo}\n{algo}")
 
         x = np.arange(len(metric1_values))
+        bar_width = 0.35
         
-        ax.bar(x, metric1_values, color='skyblue', alpha=0.7, label=metric1)
-        ax.bar(x, [-v for v in metric2_values], color='sandybrown', alpha=0.7, label=metric2)
+        # Plot bars for metric1 (test_f1) going up
+        ax.bar(x - bar_width/2, metric1_values, bar_width, color='skyblue', alpha=0.7, label=metric1)
+        
+        # Plot bars for metric2 (train_f1) going down
+        ax.bar(x + bar_width/2, [-v for v in metric2_values], bar_width, color='sandybrown', alpha=0.7, label=metric2)
+        
+        # Calculate and plot the difference
         difference = np.array(metric1_values) - np.array(metric2_values)
         ax.plot(x, difference, color='black', linewidth=2, label='Difference')
+        
+        # Plot the difference as bars overlapping the metric1 bars
+        ax.bar(x - bar_width/2, difference, bar_width, color='lightgreen', alpha=0.5, label='Difference Bar')
+        
+        # Add a horizontal line at y=0.8
+        ax.axhline(y=0.8, color='red', linestyle='--', linewidth=2, label='80% Threshold')
 
         ax.set_xlabel('Model Combinations', fontsize=10)
         ax.set_ylabel('Performance Metrics', fontsize=12)
@@ -181,17 +189,15 @@ class MLPlot:
 
         plt.xticks(x, labels, rotation=90, ha='right', fontsize=8)
         
-        y_max = max(max(metric1_values), max(metric2_values))
-        ax.set_ylim(-y_max, y_max)
-        y_ticks = np.linspace(-y_max, y_max, 11)  # Create 11 evenly spaced ticks
-        ax.set_yticks(y_ticks)
-        ax.set_yticklabels([f'{abs(y):.2f}' for y in y_ticks])        
-
-        ax.axhline(y=0, color='black', linestyle='-', linewidth=0.5)
-
-        for i, (v1, v2) in enumerate(zip(metric1_values, metric2_values)):
-            ax.text(i, v1, f'{v1:.3f}', ha='center', va='bottom', fontsize=8)
-            ax.text(i, -v2, f'{v2:.3f}', ha='center', va='top', fontsize=8)
+        y_max = max(max(metric1_values), max(metric2_values), 0.8)
+        y_min = min(min(-v for v in metric2_values), min(difference))
+        ax.set_ylim(y_min - 0.1, y_max + 0.1)
+        
+        # Add value labels
+        for i, (v1, v2, d) in enumerate(zip(metric1_values, metric2_values, difference)):
+            ax.text(i - bar_width/2, v1, f'{v1:.3f}', ha='center', va='bottom', fontsize=8, rotation=90)
+            ax.text(i + bar_width/2, -v2, f'{v2:.3f}', ha='center', va='top', fontsize=8, rotation=90)
+            ax.text(i, d, f'{d:.3f}', ha='center', va='bottom' if d > 0 else 'top', fontsize=8)
 
         plt.tight_layout()
         plot_path = os.path.join(output_dir, f"{metric1}_vs_{metric2}_comparison_{target}.png")

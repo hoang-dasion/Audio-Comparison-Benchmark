@@ -1,6 +1,7 @@
 import os
 import time
 import json
+import numpy as np
 from functools import wraps
 
 def milliseconds_to_hms(milliseconds):
@@ -34,3 +35,18 @@ def setup_output_directories():
 def save_json(data, filepath):
     with open(filepath, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
+
+def calculate_weighted_accuracies(all_results, metric='test_accuracy'):
+    weighted_accuracies = {}
+    for target, target_results in all_results.items():
+        weighted_accuracies[target] = {}
+        for combo, combo_results in target_results.items():
+            total_accuracy = sum(result[metric] for result in combo_results.values())
+            weights = {algo: result[metric] / total_accuracy 
+                       for algo, result in combo_results.items()}
+            
+            weighted_accuracies[target][combo] = {}
+            for algo, result in combo_results.items():
+                weighted_pred = np.array(result['test_pred']) * weights[algo]
+                weighted_accuracies[target][combo][algo] = weighted_pred.tolist()
+    return weighted_accuracies
