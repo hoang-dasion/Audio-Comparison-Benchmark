@@ -1,0 +1,38 @@
+{
+    "PHQ_Binary": {
+        "D1": {
+            "Best audio extraction combination": "nlp",
+            "Final Decision": "Yes"
+        },
+        "D2": {
+            "Best audio extraction combination": "audio",
+            "Final Decision": "No"
+        },
+        "M1": {
+            "Best audio extraction combination": "nlp",
+            "Final Decision": "Yes"
+        },
+        "S1": {
+            "Best audio extraction combination": "nlp",
+            "Final Decision": "Yes"
+        }
+    },
+    "PCL-C (PTSD)": {
+        "D1": {
+            "Best audio extraction combination": "audio-graph-nlp",
+            "Final Decision": "No"
+        },
+        "D2": {
+            "Best audio extraction combination": "audio",
+            "Final Decision": "Yes"
+        },
+        "M1": {
+            "Best audio extraction combination": "audio-graph-nlp",
+            "Final Decision": "No"
+        },
+        "S1": {
+            "Best audio extraction combination": "audio",
+            "Final Decision": "Yes"
+        }
+    }
+}

@@ -8,6 +8,7 @@ from data_loader import combine_features, generate_feature_combinations
 from config import ML_ALGORITHMS, TARGET_COLUMNS
 import logging
 from utils import calculate_weighted_accuracies
+import json
 
 def load_selected_features(target, combo):
     features_file = f'./output/selected_features/{target}/{"-".join(sorted(combo))}_features.json'
@@ -25,12 +26,13 @@ def load_model(target, combo, algo_name):
 def predict_single_model(model, X_scaled):
     return model.predict(X_scaled)
 
-def ensemble_predict(all_predictions, weighted_accuracies):
+def make_final_prediction(all_predictions, weighted_accuracies):
     THRESHOLD = 0.6
-    ensemble_predictions = {}
+    ensemble_predictions = {}; final_predictions = {}
     
     for target, target_predictions in all_predictions.items():
         ensemble_predictions[target] = {}
+        final_predictions[target] = {}
         
         for combo, combo_predictions in target_predictions.items():
             weights = {algo: np.mean(weighted_accuracies[target][combo][algo]) 
@@ -40,19 +42,31 @@ def ensemble_predict(all_predictions, weighted_accuracies):
             total_weight = sum(weights.values())
             normalized_weights = {algo: weight / total_weight for algo, weight in weights.items()}
             
+            # print("f{normalized_weights}", normalized_weights)
+            
             # Make final prediction
             participant_ids = list(next(iter(combo_predictions.values())).keys())
             ensemble_predictions[target][combo] = {}
+            
             for participant_id in participant_ids:
                 weighted_votes = sum(
                     normalized_weights[algo] * prediction[participant_id]
                     for algo, prediction in combo_predictions.items()
                 )
+                ensemble_predictions[target][combo][participant_id] = weighted_votes
                 
-                # Final prediction is 1 if weighted vote is >= THRESHOLD, else 0
-                ensemble_predictions[target][combo][participant_id] = int(weighted_votes >= THRESHOLD)
+                
+        # Final prediction is YES if majority vote is >= THRESHOLD, else NO
+        df = pd.DataFrame(ensemble_predictions[target])
+        df['max'] = df.max(axis=1)
+        df['chosen_combo'] = df.idxmax(axis=1)
+        df['threshold'] = THRESHOLD
+        df['has diseases'] = np.where(df['max'] >= df['threshold'], "Yes", "No")
+
+        for file_name, row in df.iterrows():
+            final_predictions[target][file_name] = {"Best audio extraction combination": row['chosen_combo'], "Final Decision": row['has diseases']}
     
-    return ensemble_predictions
+    return ensemble_predictions, final_predictions
 
 def predict_on_test_data(test_feature_sets, all_results):
     all_predictions = {target: {} for target in TARGET_COLUMNS}
@@ -84,10 +98,11 @@ def predict_on_test_data(test_feature_sets, all_results):
             all_predictions[target]['-'.join(sorted(combo))] = combo_predictions
 
     weighted_accuracies = calculate_weighted_accuracies(all_results)
-    ensemble_predictions = ensemble_predict(all_predictions, weighted_accuracies)
+    ensemble_predictions, final_predictions = make_final_prediction(all_predictions, weighted_accuracies)
 
     save_predictions(all_predictions)
     save_predictions(ensemble_predictions, filename='ensemble_predictions.json')
+    save_predictions(final_predictions, filename='final_predictions.json')
 
 def save_predictions(predictions, filename='test_predictions.json'):
     with open(os.path.join('./output', filename), 'w', encoding='utf-8') as f:

@@ -2,19 +2,25 @@ import argparse
 import os
 import logging
 import numpy as np
+import pandas as pd
 from data_loader import load_data, combine_features
 from model_trainer import train_and_evaluate_models
 from predictor import predict_on_test_data
 from ml_plot import MLPlot
 from config import TARGET_COLUMNS
 from utils import setup_output_directories, save_json, calculate_weighted_accuracies
+from sklearn.model_selection import train_test_split
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Set a global random seed
+np.random.seed(42)
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Train models and make predictions.")
     parser.add_argument("train_data_path", help="Path to the folder containing the training data files")
     parser.add_argument("prediction_data_path", help="Path to the folder containing the prediction data files")
+    parser.add_argument("--optimize", action="store_true", help="Optimize model parameters before training")
     return parser.parse_args()
 
 def load_and_preprocess_data(data_path, is_training=True):
@@ -42,6 +48,18 @@ def load_and_preprocess_data(data_path, is_training=True):
 
     return labels, feature_sets
 
+def align_features_and_labels(labels, feature_sets):
+    common_ids = set(labels['Participant_ID'])
+    for feature_set in feature_sets.values():
+        common_ids = common_ids.intersection(feature_set.index)
+    
+    labels_aligned = labels[labels['Participant_ID'].isin(common_ids)]
+    feature_sets_aligned = {
+        key: value.loc[list(common_ids)] for key, value in feature_sets.items()
+    }
+    
+    return labels_aligned, feature_sets_aligned
+
 def main():
     args = parse_arguments()
     setup_output_directories()
@@ -53,10 +71,13 @@ def main():
         return
 
     labels, feature_sets = train_data
+    
+    # Align features and labels
+    labels, feature_sets = align_features_and_labels(labels, feature_sets)
 
     # Train and evaluate models
     logging.info("Training and evaluating models...")
-    all_results = train_and_evaluate_models(labels, feature_sets)
+    all_results = train_and_evaluate_models(labels, feature_sets, optimize=args.optimize)
 
     # Calculate weighted accuracies
     weighted_accuracies = calculate_weighted_accuracies(all_results)

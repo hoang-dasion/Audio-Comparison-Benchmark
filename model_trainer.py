@@ -11,6 +11,7 @@ from feature_selection import perform_feature_selection
 from ml_algorithms import MLAlgorithms
 from config import ML_ALGORITHMS, TARGET_COLUMNS
 from utils import timing_decorator, save_json
+from optimize_params import optimize_params
 import logging
 
 def load_ml_params(algo_name):
@@ -23,15 +24,14 @@ def load_ml_params(algo_name):
         return {}
 
 @timing_decorator
-def train_and_evaluate_model(algo_name, X_train, y_train, X_test, y_test):
+def train_and_evaluate_model(algo_name, X_train, y_train, X_test, y_test, params):
     ml_algorithms = MLAlgorithms()
-    params = load_ml_params(algo_name)
     model = ml_algorithms.train_model(algo_name, X_train, y_train, params)
     train_accuracy, test_accuracy, train_f1, test_f1 = ml_algorithms.evaluate_model(model, X_train, y_train, X_test, y_test)
     test_pred = model.predict(X_test)
     return train_accuracy, test_accuracy, train_f1, test_f1, test_pred, model
 
-def train_and_evaluate_models(labels, feature_sets):
+def train_and_evaluate_models(labels, feature_sets, optimize=False):
     all_results = {target: {} for target in TARGET_COLUMNS}
 
     for target in TARGET_COLUMNS:
@@ -58,8 +58,14 @@ def train_and_evaluate_models(labels, feature_sets):
             
             combo_results = {}
             for algo_name in ML_ALGORITHMS:
+                if optimize:
+                    best_params = optimize_params(algo_name, X_train_scaled, y_train)
+                else:
+                    # Use default or pre-optimized parameters
+                    best_params = load_ml_params(algo_name)
+                
                 result, execution_time = train_and_evaluate_model(
-                    algo_name, X_train_scaled, y_train, X_test_scaled, y_test
+                    algo_name, X_train_scaled, y_train, X_test_scaled, y_test, best_params
                 )
                 train_accuracy, test_accuracy, train_f1, test_f1, test_pred, model = result
                 
@@ -69,7 +75,8 @@ def train_and_evaluate_models(labels, feature_sets):
                     'train_f1': float(train_f1),
                     'test_f1': float(test_f1),
                     'test_pred': test_pred.tolist(),
-                    'execution_time': execution_time
+                    'execution_time': execution_time,
+                    'best_params': best_params
                 }
 
                 save_model(model, target, algo_name, combo)

@@ -78,7 +78,7 @@ class MLPlot:
         plt.savefig(plot_path)
         plt.close(fig)
 
-        print(f"3D plot of weighted accuracies for {target} saved to: {plot_path}\n")
+        print(f"3D plot of weighted accuracies for {target} saved to: {plot_path}")
         return best_combo
 
     @staticmethod
@@ -132,7 +132,7 @@ class MLPlot:
         plt.savefig(plot_path, dpi=300, bbox_inches='tight')
         plt.close(fig)
 
-        print(f"2D stacked plot of accuracies for {target} saved to: {plot_path}\n")
+        print(f"2D stacked plot of accuracies for {target} saved to: {plot_path}")
 
         return max(
             ((combo, algo) 
@@ -204,7 +204,7 @@ class MLPlot:
         plt.savefig(plot_path, dpi=300, bbox_inches='tight')
         plt.close(fig)
 
-        print(f"{metric1} vs {metric2} comparison plot for {target} saved to: {plot_path}\n")
+        print(f"{metric1} vs {metric2} comparison plot for {target} saved to: {plot_path}")
 
     @staticmethod
     def generate_plots(all_results, weighted_accuracies, f1_weighted_accuracies, output_dir):

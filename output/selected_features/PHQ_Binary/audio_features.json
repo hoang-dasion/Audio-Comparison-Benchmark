@@ -1,1 +1,1 @@
-["magnitude_spectrum", "phase_spectrum", "(frequency_spectrum, cepstrum)", "frequency_spectrum", "(frequency_spectrum, magnitude_spectrum)", "cepstrum"]
+["magnitude_spectrum", "(frequency_spectrum, magnitude_spectrum)", "cepstrum", "(frequency_spectrum, cepstrum)", "phase_spectrum", "frequency_spectrum"]
