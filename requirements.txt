@@ -10,5 +10,5 @@ scipy==1.14.1
 seaborn==0.13.2
 SpeechRecognition==3.10.4
 torch==2.4.0
-tqdm==4.66.2
+tqdm==4.66.3
 transformers==4.44.2
