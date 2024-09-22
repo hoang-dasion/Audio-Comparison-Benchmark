@@ -32,6 +32,7 @@ def train_and_evaluate_model(algo_name, X_train, y_train, X_test, y_test, params
     return train_accuracy, test_accuracy, train_f1, test_f1, test_pred, model
 
 def train_and_evaluate_models(labels, feature_sets, optimize=False):
+    THRESHOLD = 0.8
     all_results = {target: {} for target in TARGET_COLUMNS}
 
     for target in TARGET_COLUMNS:
@@ -69,15 +70,17 @@ def train_and_evaluate_models(labels, feature_sets, optimize=False):
                 )
                 train_accuracy, test_accuracy, train_f1, test_f1, test_pred, model = result
                 
-                combo_results[algo_name] = {
-                    'train_accuracy': float(train_accuracy),
-                    'test_accuracy': float(test_accuracy),
-                    'train_f1': float(train_f1),
-                    'test_f1': float(test_f1),
-                    'test_pred': test_pred.tolist(),
-                    'execution_time': execution_time,
-                    'best_params': best_params
-                }
+                if test_accuracy >= THRESHOLD:
+
+                    combo_results[algo_name] = {
+                        'train_accuracy': float(train_accuracy),
+                        'test_accuracy': float(test_accuracy),
+                        'train_f1': float(train_f1),
+                        'test_f1': float(test_f1),
+                        'test_pred': test_pred.tolist(),
+                        'execution_time': execution_time,
+                        'best_params': best_params
+                    }
 
                 save_model(model, target, algo_name, combo)
                 save_selected_features(selected_features, target, combo)
